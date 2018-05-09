@@ -97,3 +97,67 @@ class Article(BaseHandler):
         self.article_content.delete_one({'article_id': args.article_id})
 
         self.success()
+
+
+class ArticlePublishState(BaseHandler):
+    """Generate a id for article."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def post(self, *_args, **_kwargs):
+        yield self.check_auth()
+
+        args = self.parse_json_arguments('article_id', 'publish_status')
+
+        tasks.update_article_publish_state(
+            article_id=args.article_id,
+            publish_status=args.publish_status,
+        )
+
+        self.success()
+
+
+class ArticleList(BaseHandler):
+    """Query Multi articles."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+
+        args = self.parse_form_arguments('category_id')
+
+        query_result = tasks.query_article_info_list(
+            category_id=args.category_id)
+
+        order_list = self.article_order.find_one({
+            'category_id':
+            args.category_id
+        })
+
+        if order_list:
+            order_list = order_list.get('article_order')
+
+        self.success(
+            data=dict(article_list=query_result, order_list=order_list))
+
+
+class ArticleOrder(BaseHandler):
+    """Handler category order stuff."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def post(self, *_args, **_kwargs):
+        """Update Article Order of a Category."""
+        yield self.check_auth()
+
+        args = self.parse_json_arguments('category_id', 'order_list')
+
+        self.article_order.update(
+            {
+                'category_id': args.category_id
+            }, {'$set': {
+                'article_order': args.order_list
+            }},
+            upsert=True)
+
+        self.success()

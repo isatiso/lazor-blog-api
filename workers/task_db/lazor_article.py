@@ -37,6 +37,47 @@ def query_article(article_id, **kwargs):
 
 
 @exc_handler
+def query_article_info_list(**kwargs):
+    """Query Article Info."""
+    sess = kwargs.get('sess')
+
+    result = sess.query(Article, Category, User).outerjoin(
+        Category, Category.category_id == Article.category_id).outerjoin(
+            User, User.user_id == Article.user_id)
+
+    if kwargs.get('category_id'):
+        result = result.filter(Article.category_id == kwargs['category_id'])
+
+    if kwargs.get('publish_status'):
+        result = result.filter(
+            Article.publish_status == kwargs['publish_status'])
+
+    result = result.order_by(desc(Article.create_time))
+
+    if kwargs.get('limit'):
+        result = result.limit(kwargs['limit'])
+    else:
+        result = result.all()
+
+    article_list = list()
+    for article, category, user in result:
+        item = dict()
+        if article:
+            item.update(
+                article.to_dict([
+                    'article_id', 'title', 'update_time', 'create_time',
+                    'publish_status'
+                ]))
+        if category:
+            item.update(category.to_dict(['category_id', 'category_name']))
+        if user:
+            item.update(user.to_dict(['user_id', 'username']))
+        article_list.append(item)
+
+    return dict(article_list=article_list)
+
+
+@exc_handler
 def insert_article(title, user_id, category_id, **kwargs):
     """Insert Article."""
     sess = kwargs.get('sess')
@@ -84,6 +125,20 @@ def update_article(article_id, **kwargs):
 
 
 @exc_handler
+def update_article_publish_state(article_id, publish_status, **kwargs):
+    """Update publish state of an article."""
+    sess = kwargs.get('sess')
+
+    effect_rows = sess.query(Article).filter(
+        Article.article_id == article_id).update(
+            dict(publish_status=publish_status))
+
+    sess.commit()
+
+    return dict(effect_rows=effect_rows)
+
+
+@exc_handler
 def delete_article(article_id, user_id, **kwargs):
     """Delete article."""
     sess = kwargs.get('sess')
@@ -112,6 +167,7 @@ def delete_article_by_category_id(category_id, **kwargs):
 
 TASK_DICT = dict(
     query_article=query_article,
+    query_article_info_list=query_article_info_list,
     insert_article=insert_article,
     update_article=update_article,
     delete_article=delete_article,
