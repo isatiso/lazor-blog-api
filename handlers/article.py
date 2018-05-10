@@ -25,10 +25,8 @@ class Article(BaseHandler):
         article_content = self.article_content.find_one(
             dict(article_id=args.article_id))
 
-        self.success(
-            data=dict(
-                article=result['data']['article'],
-                content=article_content['content']))
+        result['data']['article']['content'] = article_content['content']
+        self.success(result['data']['article'])
 
     @web.asynchronous
     @gen.coroutine
@@ -126,8 +124,9 @@ class ArticleList(BaseHandler):
 
         args = self.parse_form_arguments('category_id')
 
-        query_result = tasks.query_article_info_list(
-            category_id=args.category_id)
+        result = tasks.query_article_info_list(category_id=args.category_id)
+
+        article_list = result['data']['article_list']
 
         order_list = self.article_order.find_one({
             'category_id':
@@ -138,7 +137,7 @@ class ArticleList(BaseHandler):
             order_list = order_list.get('article_order')
 
         self.success(
-            data=dict(article_list=query_result, order_list=order_list))
+            data=dict(article_list=article_list, order_list=order_list))
 
 
 class ArticleOrder(BaseHandler):
