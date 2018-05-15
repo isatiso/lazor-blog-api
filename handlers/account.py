@@ -9,7 +9,7 @@ from lib import generate, verify
 from config import CFG as O_O
 
 
-class User(BaseHandler):
+class Auth(BaseHandler):
     """Handler account stuff."""
 
     @web.asynchronous
@@ -34,6 +34,7 @@ class User(BaseHandler):
             self.fail(3002)
 
         user_params = dict(
+            supervisor=user_info['supervisor'],
             user_name=user_info['username'],
             email=user_info['email'],
             user_id=user_info['user_id'])
@@ -75,6 +76,10 @@ class User(BaseHandler):
         self.set_current_user('')
         self.set_parameters(dict())
         self.success()
+
+
+class User(BaseHandler):
+    pass
 
 
 class UserProfile(BaseHandler):
@@ -124,3 +129,16 @@ class UserPassword(BaseHandler):
         tasks.update_user_pass(user_id=params.user_id, pswd=new_md5)
 
         self.success()
+
+
+class UserList(BaseHandler):
+    """Handle normal users."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+        _params = yield self.check_auth(supervisor=1)
+
+        user_list = tasks.query_normal_user_list()
+
+        self.success(user_list['data']['users'])

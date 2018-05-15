@@ -17,6 +17,7 @@ class User(BASE):
     email = Column(String(255), unique=True, nullable=False, index=True)
     pswd = Column(CHAR(32), nullable=False)
     active_status = Column(SmallInteger, nullable=True, default=0)
+    supervisor = Column(SmallInteger, nullable=True, default=0)
     create_time = Column(Integer, nullable=False, index=True)
 
     __table_args__ = ({'mysql_engine': 'InnoDB'}, )

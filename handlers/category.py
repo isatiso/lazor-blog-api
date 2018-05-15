@@ -79,6 +79,8 @@ class Category(BaseHandler):
 class CategoryOrder(BaseHandler):
     """Handler category order stuff."""
 
+    @web.asynchronous
+    @gen.coroutine
     def post(self, *_args, **_kwargs):
         params = yield self.check_auth()
 

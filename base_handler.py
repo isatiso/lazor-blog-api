@@ -126,9 +126,9 @@ class BaseHandler(RequestHandler, Mongo):
         if user_id != params.user_id:
             clean_and_fail(3006)
 
-        ac_code = yield self.get_session_code()
-        if ac_code is not '' and params.ac_code != ac_code:
-            clean_and_fail(3007)
+        # ac_code = yield self.get_session_code()
+        # if ac_code is not '' and params.ac_code != ac_code:
+        #     clean_and_fail(3007)
 
         for key in kwargs:
             if params[key] != kwargs[key]:

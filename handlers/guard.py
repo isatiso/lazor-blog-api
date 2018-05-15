@@ -20,6 +20,17 @@ class AuthGuard(BaseHandler):
         self.success(params)
 
 
+class SupervisorGuard(BaseHandler):
+    """Handler account stuff."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+        params = yield self.check_auth(supervisor=1)
+
+        self.success(params)
+
+
 class ArticleOwnerGuard(BaseHandler):
     """Handler if user own the article."""
 

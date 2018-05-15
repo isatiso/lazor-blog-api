@@ -41,6 +41,24 @@ def query_user_exists(email='', username='', **kwargs):
 
 
 @exc_handler
+def query_normal_user_list(**kwargs):
+    """Query all users except supervisor."""
+    sess = kwargs.get('sess')
+
+    users = sess.query(User).filter(User.supervisor == 0).all()
+
+    if users:
+        users = [
+            user.to_dict(['user_id', 'username', 'email', 'active_status'])
+            for user in users
+        ]
+    else:
+        users = None
+
+    return dict(users=users)
+
+
+@exc_handler
 def insert_user(email, pswd, username, **kwargs):
     """Insert a user."""
     sess = kwargs.get('sess')
@@ -88,6 +106,7 @@ def update_user_pass(user_id, pswd, **kwargs):
 TASK_DICT = dict(
     query_user=query_user,
     query_user_exists=query_user_exists,
+    query_normal_user_list=query_normal_user_list,
     insert_user=insert_user,
     update_user_name=update_user_name,
     update_user_pass=update_user_pass,

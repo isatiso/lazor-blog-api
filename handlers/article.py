@@ -75,8 +75,9 @@ class Article(BaseHandler):
                 upsert=True)
 
         result = tasks.query_article(article_id=args.article_id)
+        result['data']['article']['content'] = args.content
 
-        self.success(dict(article=result['data'], content=args.content))
+        self.success(result['data']['article'])
 
     @web.asynchronous
     @gen.coroutine
