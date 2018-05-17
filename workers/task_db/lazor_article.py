@@ -37,6 +37,37 @@ def query_article(article_id, **kwargs):
 
 
 @exc_handler
+def query_article_latest(**kwargs):
+    """Query Article Info."""
+    sess = kwargs.get('sess')
+
+    result = sess.query(Article, Category, User).outerjoin(
+        Category, Category.category_id == Article.category_id).outerjoin(
+            User, User.user_id == Article.user_id)
+
+    result = result.order_by(desc(Article.create_time))
+
+    result = result.limit(20)
+
+    article_list = list()
+    for article, category, user in result:
+        item = dict()
+        if article:
+            item.update(
+                article.to_dict([
+                    'article_id', 'title', 'update_time', 'create_time',
+                    'publish_status'
+                ]))
+        if category:
+            item.update(category.to_dict(['category_id', 'category_name']))
+        if user:
+            item.update(user.to_dict(['user_id', 'username']))
+        article_list.append(item)
+
+    return dict(article_list=article_list)
+
+
+@exc_handler
 def query_article_info_list(**kwargs):
     """Query Article Info."""
     sess = kwargs.get('sess')
@@ -168,6 +199,7 @@ def delete_article_by_category_id(category_id, **kwargs):
 TASK_DICT = dict(
     query_article=query_article,
     query_article_info_list=query_article_info_list,
+    query_article_latest=query_article_latest,
     insert_article=insert_article,
     update_article=update_article,
     delete_article=delete_article,

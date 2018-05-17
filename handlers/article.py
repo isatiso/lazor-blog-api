@@ -141,6 +141,20 @@ class ArticleList(BaseHandler):
             data=dict(article_list=article_list, order_list=order_list))
 
 
+class ArticleLatest(BaseHandler):
+    """Query Multi articles."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+
+        result = tasks.query_article_latest()
+
+        article_list = result['data']['article_list']
+
+        self.success(data=dict(article_list=article_list))
+
+
 class ArticleOrder(BaseHandler):
     """Handler category order stuff."""
 

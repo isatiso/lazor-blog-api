@@ -79,7 +79,22 @@ class Auth(BaseHandler):
 
 
 class User(BaseHandler):
-    pass
+    """Handler user stuff."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+        args = self.parse_form_arguments('user_id')
+
+        result = tasks.query_user(user_id=args.user_id)
+
+        user_params = dict(
+            supervisor=result['data']['supervisor'],
+            user_name=result['data']['username'],
+            email=result['data']['email'],
+            user_id=result['data']['user_id'])
+
+        self.success(user_params)
 
 
 class UserProfile(BaseHandler):

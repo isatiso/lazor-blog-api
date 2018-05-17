@@ -16,12 +16,13 @@ class Category(BaseHandler):
     @gen.coroutine
     def get(self, *_args, **_kwargs):
         """Get Category List of Current User."""
-        params = yield self.check_auth()
 
-        result = tasks.query_category_by_user_id(user_id=params.user_id)
+        args = self.parse_form_arguments('user_id')
+
+        result = tasks.query_category_by_user_id(user_id=args.user_id)
         category_list = result['data']['category_list']
 
-        order_list = self.category_order.find_one({'user_id': params.user_id})
+        order_list = self.category_order.find_one({'user_id': args.user_id})
 
         if order_list:
             order_list = order_list.get('category_order')
