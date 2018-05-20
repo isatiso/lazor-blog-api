@@ -16,7 +16,6 @@ class Category(BaseHandler):
     @gen.coroutine
     def get(self, *_args, **_kwargs):
         """Get Category List of Current User."""
-
         args = self.parse_form_arguments('user_id')
 
         result = tasks.query_category_by_user_id(user_id=args.user_id)
@@ -75,6 +74,34 @@ class Category(BaseHandler):
         tasks.delete_article_by_category_id(category_id=args.category_id)
 
         self.success()
+
+
+class CategoryInfo(BaseHandler):
+    """Handler category stuff."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+        """Get Category List of Current User."""
+        args = self.parse_form_arguments('category_id')
+
+        result = tasks.query_category_by_id(category_id=args.category_id)
+
+        self.success(data=dict(category_info=result['data']['category_info']))
+
+
+class CategoryIndex(BaseHandler):
+    """Handler category stuff."""
+
+    @web.asynchronous
+    @gen.coroutine
+    def get(self, *_args, **_kwargs):
+        """Get Category List of Current User."""
+        result = tasks.query_category_by_category_status(category_status=1)
+
+        category_list = result['data']['category_list']
+
+        self.success(data=dict(category_list=category_list))
 
 
 class CategoryOrder(BaseHandler):

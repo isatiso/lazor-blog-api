@@ -11,12 +11,42 @@ from workers.manager import exc_handler
 
 
 @exc_handler
+def query_category_by_id(category_id, **kwargs):
+    """Query Category Info."""
+    sess = kwargs.get('sess')
+
+    category = sess.query(Category).filter(
+        Category.category_id == category_id).first()
+
+    return dict(
+        category_info=category.to_dict(('category_id', 'category_name',
+                                        'create_time', 'category_type')))
+
+
+@exc_handler
 def query_category_by_user_id(user_id, **kwargs):
     """Query Category Info."""
     sess = kwargs.get('sess')
 
     category_list = sess.query(Category).filter(
         Category.user_id == user_id).all()
+
+    category_list = [
+        category.to_dict(('category_id', 'category_name', 'create_time',
+                          'category_type')) for category in category_list
+    ]
+
+    return dict(category_list=category_list)
+
+
+@exc_handler
+def query_category_by_category_status(category_status, **kwargs):
+    """Query Category Info."""
+    sess = kwargs.get('sess')
+
+    category_list = sess.query(Category).filter(
+        Category.category_order == category_status).order_by(
+            Category.create_time).all()
 
     category_list = [
         category.to_dict(('category_id', 'category_name', 'create_time',
@@ -77,7 +107,9 @@ def delete_category(category_id, user_id, **kwargs):
 
 
 TASK_DICT = dict(
+    query_category_by_id=query_category_by_id,
     query_category_by_user_id=query_category_by_user_id,
+    query_category_by_category_status=query_category_by_category_status,
     insert_category=insert_category,
     update_category_name=update_category_name,
     delete_category=delete_category,

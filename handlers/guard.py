@@ -43,9 +43,11 @@ class ArticleOwnerGuard(BaseHandler):
 
         result = tasks.query_article(article_id=args.article_id)
 
-        if not result['data']:
+        if not result['data'].get('article'):
             self.fail(4004)
-        if params.user_id != result['data']['user_id']:
+
+        article = result['data'].get('article')
+        if params.user_id != article['user_id']:
             self.fail(4005)
 
         self.success()

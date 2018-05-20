@@ -14,26 +14,45 @@ def query_article(article_id, **kwargs):
     """Query Article Info."""
     sess = kwargs.get('sess')
 
-    article, category, user = sess.query(Article, Category, User).outerjoin(
+    result = sess.query(Article, Category, User).outerjoin(
         Category, Category.category_id == Article.category_id).outerjoin(
             User, User.user_id == Article.user_id).filter(
                 Article.article_id == article_id).first()
+    if result:
+        article, category, user = result
+        result = dict()
+        if article:
+            result.update(
+                article.to_dict([
+                    'article_id', 'title', 'update_time', 'create_time',
+                    'publish_status'
+                ]))
 
-    result = dict()
-    if article:
-        result.update(
-            article.to_dict([
-                'article_id', 'title', 'update_time', 'create_time',
-                'publish_status'
-            ]))
+        if category:
+            result.update(category.to_dict(['category_id', 'category_name']))
 
-    if category:
-        result.update(category.to_dict(['category_id', 'category_name']))
+        if user:
+            result.update(user.to_dict(['user_id', 'user_name', 'email']))
 
-    if user:
-        result.update(user.to_dict(['user_id', 'user_name', 'email']))
+        return dict(article=result)
+    else:
+        return dict(article=None)
 
-    return dict(article=result)
+
+@exc_handler
+def query_article_relative(article_id, **kwargs):
+    """Query Article Relative Info."""
+    sess = kwargs.get('sess')
+
+    article, category, user = sess.query(Article, Category, User).join(
+        Category, Category.category_id == Article.category_id).join(
+            User, User.user_id == Article.user_id).filter(
+                Article.article_id == article_id).first()
+
+    return dict(
+        article=article.to_dict(),
+        category=category.to_dict(),
+        user=user.to_dict())
 
 
 @exc_handler
@@ -45,7 +64,7 @@ def query_article_latest(**kwargs):
         Category, Category.category_id == Article.category_id).outerjoin(
             User, User.user_id == Article.user_id)
 
-    result = result.order_by(desc(Article.create_time))
+    result = result.order_by(desc(Article.update_time))
 
     result = result.limit(20)
 
@@ -199,6 +218,7 @@ def delete_article_by_category_id(category_id, **kwargs):
 TASK_DICT = dict(
     query_article=query_article,
     query_article_info_list=query_article_info_list,
+    query_article_relative=query_article_relative,
     query_article_latest=query_article_latest,
     insert_article=insert_article,
     update_article=update_article,
