@@ -172,7 +172,7 @@ class ImageRecord(BaseHandler):
 
     id_checker = re.compile(
         r'^([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})$')
-    referer_checker = re.compile(r'\/\/lazor\.cn\/')
+    referer_checker = re.compile(r'(lazor\.cn|thor\.cn)')
 
     @web.asynchronous
     @gen.coroutine
