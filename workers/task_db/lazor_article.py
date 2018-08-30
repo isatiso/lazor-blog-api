@@ -62,7 +62,8 @@ def query_article_latest(**kwargs):
 
     result = sess.query(Article, Category, User).outerjoin(
         Category, Category.category_id == Article.category_id).outerjoin(
-            User, User.user_id == Article.user_id)
+            User, User.user_id == Article.user_id).filter(
+                Article.publish_status == 1)
 
     result = result.order_by(desc(Article.update_time))
 
@@ -222,6 +223,7 @@ TASK_DICT = dict(
     query_article_latest=query_article_latest,
     insert_article=insert_article,
     update_article=update_article,
+    update_article_publish_state=update_article_publish_state,
     delete_article=delete_article,
     delete_article_by_category_id=delete_article_by_category_id,
 )

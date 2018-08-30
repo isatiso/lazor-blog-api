@@ -21,6 +21,7 @@ LAZOR_ROUTES = [
     (r'/middle/article/relative', article.ArticleRelative),
     (r'/middle/article/latest', article.ArticleLatest),
     (r'/middle/article/order', article.ArticleOrder),
+    (r'/middle/article/publish', article.ArticlePublishState),
     (r'/middle/guard/auth', guard.AuthGuard),
     (r'/middle/guard/owner', guard.ArticleOwnerGuard),
     (r'/middle/guard/supervisor', guard.SupervisorGuard),
